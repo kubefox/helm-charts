@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "router.fullname" . }}
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "router.selectorLabels" . | nindent 6}}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        {{- include "router.labels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: nats-box
+        image: natsio/nats-box:0.8.0
+        imagePullPolicy: IfNotPresent
+        command:
+        - tail
+        - -f
+        - /dev/null

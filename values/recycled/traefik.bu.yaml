@@ -1,0 +1,37 @@
+globalArguments: []
+
+additionalArguments:
+# - --api=true
+# - --api.insecure=true
+# - --serversTransport.insecureSkipVerify=true
+- --pilot.dashboard=false
+
+ports:
+  websecure:
+    tls:
+      enabled: true
+
+ingressRoute:
+  dashboard:
+    enabled: false
+
+logs:
+#   general:
+#     format: json
+#     # level: DEBUG
+  access:
+    enabled: true
+#     format: json
+
+deployment:
+  podAnnotations:
+    dapr.io/enabled: "true"
+    dapr.io/app-id: "traefik"
+    dapr.io/app-port: "8443"
+    dapr.io/app-ssl: "true"
+    dapr.io/log-level: "debug"
+
+providers:
+  kubernetesCRD:
+    allowCrossNamespace: true
+    allowExternalNameServices: true

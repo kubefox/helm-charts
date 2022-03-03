@@ -1,0 +1,39 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+  labels:
+    {{- include "cert-issuer.labels" . | nindent 4 }}
+spec:
+  acme:
+    email: john.long@xigxog.io
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: {{ include "cert-issuer.fullname" . }}-private-key
+    solvers:
+    - dns01:
+        cloudflare:
+          email: john.long@xigxog.io
+          apiTokenSecretRef:
+            name: {{ include "cert-issuer.fullname" . }}-cloudflare-token
+            key: api-token
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  labels:
+    {{- include "cert-issuer.labels" . | nindent 4 }}
+spec:
+  acme:
+    email: john.long@xigxog.io
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: {{ include "cert-issuer.fullname" . }}-staging-private-key
+    solvers:
+    - dns01:
+        cloudflare:
+          email: john.long@xigxog.io
+          apiTokenSecretRef:
+            name: {{ include "cert-issuer.fullname" . }}-cloudflare-token
+            key: api-token

@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "gateway.fullname" . }}-kiali
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  hosts:
+  - istio.kubefox.io
+  - mesh.kubefox.io
+  - kiali.kubefox.io
+  gateways:
+  - istio-system/http-gateway
+  http:
+  - route:
+    - destination:
+        host: kiali
+        port:
+          number: 20001

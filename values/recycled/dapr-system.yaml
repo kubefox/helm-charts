@@ -1,0 +1,10 @@
+fullnameOverride: dapr
+
+global:
+  # logAsJson: true
+  ha:
+    enabled: false
+    replicaCount: 3
+    disruption:
+      minimumAvailable: ""
+      maximumUnavailable: "25%"

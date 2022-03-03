@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: web-pvc-1
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: juicefs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: web-pvc-2
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: juicefs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-run
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: linuxserver/nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /config
+              name: web-data-1
+          resources: {}
+      volumes:
+        - name: web-data-1
+          persistentVolumeClaim:
+            claimName: web-pvc-1
