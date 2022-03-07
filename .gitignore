@@ -1,6 +1,3 @@
 secrets/
 _template.yaml
-*.tgz
-*.lock
-notes.md
 **/__pycache__/
