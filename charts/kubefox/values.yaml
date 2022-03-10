@@ -3,10 +3,6 @@ certmanager:
   #       Limit operator only namespaces owned by KF
   installCRDs: true
 
-  # This can be set to 0 if webhooks are not used
-  webhook:
-    replicaCount: 1
-
   prometheus:
     servicemonitor:
       enabled: true
@@ -24,6 +20,9 @@ certmanager:
         #         key: api-token
 
 dapr: {}
+
+dashboards:
+  enabled: false
 
 fluentbit:
   # TODO: We only want logs from our services and units
@@ -104,7 +103,7 @@ nats:
       fileStorage:
         enabled: true
         # size: 16Gi
-        # storageClassName: local-ssd
+        # storageClassName: ssd
 
   # TODO: need to update match expressions
   # affinity:
@@ -122,8 +121,11 @@ nats:
   #           - nats
   #       topologyKey: kubernetes.io/hostname
 
+  natsbox:
+    enabled: false
+
 opensearch:
-  replicas: 1
+  replicas: 3
 
   # persistence:
   #   size: 100Gi
@@ -299,7 +301,7 @@ prometheus:
             #   memory: 200Mi
             requests:
               cpu: 100m
-              memory: 100Mi
+              memory: 128Mi
           volumeMounts:
             - name: metricbeat-config
               mountPath: /etc/metricbeat.yml

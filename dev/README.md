@@ -4,13 +4,20 @@
 
 ### Install
 
-Disables default components so they can be configured by charts present here.
+Disabled services will be configured by charts present here.
 
 ```bash
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --disable coredns --disable traefik --disable metrics-server --disable servicelb --disable local-storage" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --disable traefik --disable local-storage" sh -
 ```
 
 ## OpenSearch
+
+Ensure that `vm.max_map_count` is set to at least `262144`.
+
+```ssh
+sudo sysctl vm.max_map_count
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+```
 
 ### Index Management/Index policies
 

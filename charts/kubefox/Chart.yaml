@@ -11,27 +11,39 @@ dependencies:
     name: cert-manager
     repository: https://charts.jetstack.io
     version: "v1.7.1"
+    condition: certmanager.enabled
   - alias: dapr
     name: dapr
     repository: https://dapr.github.io/helm-charts
     version: "1.6.0"
+    condition: dapr.enabled
+  - alias: dashboards
+    name: opensearch-dashboards
+    repository: https://opensearch-project.github.io/helm-charts
+    version: "1.2.2"
+    condition: dashboards.enabled
   - alias: fluentbit
     name: fluent-bit
     repository: https://fluent.github.io/helm-charts
     version: "0.19.20"
+    condition: fluentbit.enabled
   - alias: nats
     name: nats
     repository: https://nats-io.github.io/k8s/helm/charts
     version: "0.13.2"
+    condition: nats.enabled
   - alias: opensearch
     name: opensearch
     repository: https://opensearch-project.github.io/helm-charts
     version: "1.8.3"
+    condition: opensearch.enabled
   - alias: prometheus
     name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: "33.2.0"
+    condition: prometheus.enabled
   - alias: traefik
     name: traefik
     repository: https://helm.traefik.io/traefik
     version: "10.14.2"
+    condition: traefik.enabled

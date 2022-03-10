@@ -1,0 +1,69 @@
+certmanager:
+  issuers:
+    letsencrypt:
+      enabled: false
+      email: ""
+      solvers:
+        []
+        # - dns01:
+        #     cloudflare:
+        #       email: example@acme.com
+        #       apiTokenSecretRef:
+        #         name: cloudflare-token
+        #         key: api-token
+
+dapr: {}
+
+dashboards:
+  enabled: true
+
+fluentbit: {}
+
+nats:
+  cluster:
+    enabled: false
+    replicas: 1
+
+  nats:
+    jetstream:
+      enabled: true
+      memStorage:
+        enabled: true
+        size: 1Gi
+      fileStorage:
+        enabled: true
+        size: 4Gi
+        storageClassName: ssd
+
+  natsbox:
+    enabled: true
+
+opensearch:
+  replicas: 1
+
+  persistence:
+    size: 8Gi
+    storageClass: hdd
+    accessModes:
+      - ReadWriteOnce
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1024Mi
+
+prometheus:
+  prometheus:
+    prometheusSpec:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: ssd
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 2Gi
+
+traefik:
+  replicas: 1
