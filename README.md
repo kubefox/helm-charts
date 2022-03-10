@@ -8,6 +8,7 @@ Once Helm has been set up correctly, add the repo as follows:
 
 ```bash
 helm repo add kubefox https://kubefox.github.io/helm-charts
+helm repo update
 ```
 
 If you had already added this repo earlier, run `helm repo update` to retrieve the latest versions of the packages.  You can then run `helm search repo kubefox` to see the charts.

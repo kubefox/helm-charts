@@ -1,4 +1,4 @@
-cert-manager:
+certmanager:
   # TODO: HA
   #       Limit operator only namespaces owned by KF
   installCRDs: true
@@ -7,9 +7,25 @@ cert-manager:
   webhook:
     replicaCount: 1
 
+  prometheus:
+    servicemonitor:
+      enabled: true
+
+  issuers:
+    letsencrypt:
+      enabled: false
+      email: ""
+      solvers: []
+        # - dns01:
+        #     cloudflare:
+        #       email: example@acme.com
+        #       apiTokenSecretRef:
+        #         name: cloudflare-token
+        #         key: api-token
+
 dapr: {}
 
-fluent-bit:
+fluentbit:
   # TODO: We only want logs from our services and units
   config:
     service: |
@@ -335,7 +351,7 @@ traefik:
   replicas: 1
 
   ingressClass:
-    enabled: true
+    enabled: false # TODO: make true, fails template cause of --api-versions
     isDefaultClass: false
 
   providers:

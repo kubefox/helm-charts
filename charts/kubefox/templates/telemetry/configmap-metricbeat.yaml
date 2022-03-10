@@ -3,6 +3,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: metricbeat-config
+  labels:
+    {{- include "kubefox.labels" . | nindent 4 }}
 data:
   metricbeat.yml: |-
     metricbeat.config.modules:
@@ -22,6 +24,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: metricbeat-modules
+  labels:
+    {{- include "kubefox.labels" . | nindent 4 }}
 data:
   prometheus.yml: |-
     - module: prometheus
