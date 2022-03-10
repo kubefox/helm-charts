@@ -42,7 +42,7 @@ opensearch:
   replicas: 1
 
   persistence:
-    size: 8Gi
+    size: 16Gi
     storageClass: hdd
     accessModes:
       - ReadWriteOnce

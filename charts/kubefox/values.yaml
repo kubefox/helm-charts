@@ -352,6 +352,10 @@ prometheus:
 traefik:
   replicas: 1
 
+  # TODO: Do we really want to even enable an ingress class?
+  #       Perhaps better to just use Traefik IngressRoute CRD internally?
+  #       https://doc.traefik.io/traefik/providers/kubernetes-crd/
+  #       Gives us more control and nicer matching rule language
   ingressClass:
     enabled: false # TODO: make true, fails template cause of --api-versions
     isDefaultClass: false
@@ -365,8 +369,10 @@ traefik:
       # ingressClass: traefik-internal
       # labelSelector: environment=production,method=traefik
       namespaces: []
+
+    # TODO: See "ingressClass" note above
     kubernetesIngress:
-      enabled: true
+      enabled: false
       allowExternalNameServices: false
       # labelSelector: environment=production,method=traefik
       namespaces: []
