@@ -12,14 +12,6 @@ certmanager:
       enabled: false
       email: ""
       solvers: []
-        # - dns01:
-        #     cloudflare:
-        #       email: example@acme.com
-        #       apiTokenSecretRef:
-        #         name: cloudflare-token
-        #         key: api-token
-
-dapr: {}
 
 dashboards:
   enabled: false
@@ -38,7 +30,7 @@ fluentbit:
           HTTP_Listen 0.0.0.0
           HTTP_Port {{ .Values.metricsPort }}
           Health_Check On
-          storage.path /var/log/flb-buffer
+          storage.path /var/log/fluentbit-buffer
     ## https://docs.fluentbit.io/manual/pipeline/inputs
     inputs: |
       [INPUT]
@@ -79,10 +71,11 @@ fluentbit:
           HTTP_User admin
           HTTP_Passwd admin
           Logstash_Format On
+          Logstash_Prefix kubefox-logs
           # Replace_Dots fixes issus where labels can be string or object with same key.
           # Before: kubernetes.labels.app vs kubernetes.labels.app.kubernetes.io/name
           # After:  kubernetes.labels.app vs kubernetes.labels.app_kubernetes_io/name
-          # Replace_Dots On
+          Replace_Dots On
           Retry_Limit 3
           # Type name is deprecated, turn it off
           Suppress_Type_Name On
@@ -90,36 +83,35 @@ fluentbit:
           # Trace_Output On
 
 nats:
-  cluster:
-    enabled: true
-    replicas: 3
-
   nats:
     jetstream:
       enabled: true
       memStorage:
         enabled: true
-        # size: 2Gi
+        size: 2Gi
       fileStorage:
         enabled: true
-        # size: 16Gi
+        size: 64Gi
         # storageClassName: ssd
 
-  # TODO: need to update match expressions
-  # affinity:
-  #   podAntiAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #     - labelSelector:
-  #         matchExpressions:
-  #         - key: app.kubernetes.io/instance
-  #           operator: In
-  #           values:
-  #           - nats
-  #         - key: app.kubernetes.io/name
-  #           operator: In
-  #           values:
-  #           - nats
-  #       topologyKey: kubernetes.io/hostname
+  cluster:
+    enabled: true
+    replicas: 3
+
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/instance
+                operator: In
+                values:
+                  - "{{ .Release.Name }}"
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - '{{ include "kubefox.name" . }}'
+          topologyKey: kubernetes.io/hostname
 
   natsbox:
     enabled: false
@@ -127,18 +119,18 @@ nats:
 opensearch:
   replicas: 3
 
-  # persistence:
-  #   size: 100Gi
-  #   storageClass: hdd
-  #   accessModes:
-  #     - ReadWriteOnce
+  antiAffinity: "hard"
+
+  persistence:
+    size: 128Gi
+    # storageClass: hdd
+    accessModes:
+      - ReadWriteOnce
 
   resources:
     requests:
       cpu: "500m"
       memory: "1024Mi"
-
-  antiAffinity: "hard"
 
   # TODO: Probably move this into our chart with a default domain etc, gives us more control
   #       Do we even want ingress, these are internal, can proxy during dev
@@ -259,17 +251,12 @@ prometheus:
       volumes:
         - name: metricbeat-config
           configMap:
-            defaultMode: 0640
-            name: metricbeat-config
-        - name: metricbeat-modules
-          configMap:
-            defaultMode: 0640
-            name: metricbeat-modules
-        - name: metricbeat-data
-          hostPath:
-            # When metricbeat runs as non-root user, this directory needs to be writable by group (g+w)
-            path: /var/lib/metricbeat-data
-            type: DirectoryOrCreate
+            name: metricbeat
+        # - name: metricbeat-data
+        #   hostPath:
+        #     # When metricbeat runs as non-root user, this directory needs to be writable by group (g+w)
+        #     path: /var/lib/metricbeat-data
+        #     type: DirectoryOrCreate
 
       # Add MetricBeat sidecar to proxy metrics to OpenSearch
       containers:
@@ -279,12 +266,12 @@ prometheus:
             - "-c"
             - "/etc/metricbeat.yml"
             - "-e"
-            - "-system.hostfs=/hostfs"
           env:
             - name: ELASTICSEARCH_HOST
               value: https://opensearch-cluster-master
             - name: ELASTICSEARCH_PORT
               value: "9200"
+            # TODO: Integrate creds with vault
             - name: ELASTICSEARCH_USERNAME
               value: admin
             - name: ELASTICSEARCH_PASSWORD
@@ -293,41 +280,59 @@ prometheus:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          # TODO: shouldn't run as root, see note note on volumes above
-          # securityContext:
-          #   runAsUser: 0
           resources:
-            # limits:
-            #   memory: 200Mi
             requests:
               cpu: 100m
               memory: 128Mi
           volumeMounts:
             - name: metricbeat-config
+              subPath: metricbeat.yml
               mountPath: /etc/metricbeat.yml
               readOnly: true
-              subPath: metricbeat.yml
-            - name: metricbeat-modules
-              mountPath: /usr/share/metricbeat/modules.d
+            - name: metricbeat-config
+              subPath: modules.yml
+              mountPath: /usr/share/metricbeat/modules.d/modules.yml
               readOnly: true
           # - name: metricbeat-data
           #   mountPath: /usr/share/metricbeat/data
 
-      storageSpec: {}
-      # # Using PersistentVolumeClaim
-      # #
-      #   volumeClaimTemplate:
-      #     spec:
-      #       storageClassName: ssd
-      #       accessModes: ["ReadWriteOnce"]
-      #       resources:
-      #         requests:
-      #           storage: 8Gi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            # storageClassName: ssd
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 8Gi
 
       enableFeatures: []
       # TODO: should be enabled at some point as we just remote write to opensearch
       # https://prometheus.io/docs/prometheus/latest/feature_flags/#prometheus-agent
       # - agent
+
+  metricbeat:
+    config: |-
+      metricbeat.config.modules:
+        # Mounted `metricbeat-daemonset-modules` configmap:
+        path: ${path.config}/modules.d/*.yml
+        # Reload module configs as they change:
+        reload.enabled: true
+      setup.template:
+        name: kubefox-metrics
+        pattern: kubefox-metrics-*
+      output.elasticsearch:
+        hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
+        username: ${ELASTICSEARCH_USERNAME}
+        password: ${ELASTICSEARCH_PASSWORD}
+        index: kubefox-metrics-%{+yyyy.MM.dd}
+        
+        ssl.verification_mode: none
+    modules: |-
+      - module: prometheus
+        metricsets: ["remote_write"]
+        host: "localhost"
+        port: "9201"
 
   # TODO: Will want to tweak for basic cluster monitoring
   grafana:
@@ -350,7 +355,24 @@ prometheus:
     enabled: false
 
 traefik:
-  replicas: 1
+  deployment:
+    replicas: 3
+
+  # https://github.com/traefik/traefik-helm-chart/issues/468
+  # affinity:
+  #   podAntiAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       - labelSelector:
+  #           matchExpressions:
+  #             - key: app.kubernetes.io/instance
+  #               operator: In
+  #               values:
+  #                 - "{{ .Release.Name }}"
+  #             - key: app.kubernetes.io/name
+  #               operator: In
+  #               values:
+  #                 - '{{ include "kubefox.name" . }}'
+  #         topologyKey: kubernetes.io/hostname
 
   # TODO: Do we really want to even enable an ingress class?
   #       Perhaps better to just use Traefik IngressRoute CRD internally?
