@@ -1,24 +1,26 @@
+environments:
+  default: {}
+  ha: {}
+
 releases:
   - name: local-ssd
     chart: ./charts/local-path-provisioner
     namespace: kube-system
     values:
       - values/local-ssd.yaml
-    labels:
-      group: dev
 
   - name: local-hdd
     chart: ./charts/local-path-provisioner
     namespace: kube-system
     values:
       - values/local-hdd.yaml
-    labels:
-      group: dev
 
   - name: kubefox
     chart: ../charts/kubefox
     namespace: kubefox-system
     values:
       - values/kubefox.yaml
-    labels:
-      group: kubefox
+      - values/kubefox-{{ .Environment.Name }}.yaml
+    needs:
+      - kube-system/local-ssd
+      - kube-system/local-hdd

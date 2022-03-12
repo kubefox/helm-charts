@@ -1,16 +1,15 @@
-certmanager:
-  issuers:
-    letsencrypt:
-      enabled: false
-      email: ""
-      solvers:
-        []
-        # - dns01:
-        #     cloudflare:
-        #       email: example@acme.com
-        #       apiTokenSecretRef:
-        #         name: cloudflare-token
-        #         key: api-token
+certmanager: {}
+  # issuers:
+  #   letsencrypt:
+  #     enabled: true
+  #     email: info@xigxog.io
+  #     solvers:
+  #       - dns01:
+  #           cloudflare:
+  #             email: info@xigxog.io
+  #             apiTokenSecretRef:
+  #               name: cloudflare-token
+  #               key: api-token
 
 dapr: {}
 
@@ -20,37 +19,21 @@ dashboards:
 fluentbit: {}
 
 nats:
-  cluster:
-    enabled: false
-    replicas: 1
-
   nats:
     jetstream:
-      enabled: true
       memStorage:
-        enabled: true
         size: 1Gi
       fileStorage:
-        enabled: true
-        size: 4Gi
+        size: 16Gi
         storageClassName: ssd
 
   natsbox:
     enabled: true
 
 opensearch:
-  replicas: 1
-
   persistence:
-    size: 16Gi
+    size: 32Gi
     storageClass: hdd
-    accessModes:
-      - ReadWriteOnce
-
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1024Mi
 
 prometheus:
   prometheus:
@@ -59,11 +42,8 @@ prometheus:
         volumeClaimTemplate:
           spec:
             storageClassName: ssd
-            accessModes:
-              - ReadWriteOnce
             resources:
               requests:
-                storage: 2Gi
+                storage: 4Gi
 
-traefik:
-  replicas: 1
+traefik: {}

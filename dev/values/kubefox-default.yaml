@@ -1,0 +1,20 @@
+certmanager: {}
+
+dapr: {}
+
+dashboards: {}
+
+fluentbit: {}
+
+nats:
+  cluster:
+    enabled: false
+    replicas: 1
+
+opensearch:
+  replicas: 1
+
+prometheus: {}
+
+traefik:
+  replicas: 1
