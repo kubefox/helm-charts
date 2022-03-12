@@ -1,4 +1,4 @@
-# Kube Fox Helm Charts
+# KubeFox Helm Charts
 
 ## Usage
 

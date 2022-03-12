@@ -15,6 +15,7 @@ certmanager:
 
 dashboards:
   enabled: false
+  opensearchHosts: "https://kubefox-opensearch-main:9200"
 
 fluentbit:
   # TODO: We only want logs from our services and units
@@ -63,7 +64,7 @@ fluentbit:
       [OUTPUT]
           Name es
           Match kube.*
-          Host opensearch-cluster-master
+          Host kubefox-opensearch-main
           tls On
           tls.verify Off
           net.keepalive off
@@ -117,6 +118,10 @@ nats:
     enabled: false
 
 opensearch:
+  clusterName: kubefox-opensearch
+  nodeGroup: main
+  masterService: kubefox-opensearch-main
+
   replicas: 3
 
   antiAffinity: "hard"
@@ -226,14 +231,6 @@ opensearch:
               ]
 
 prometheus:
-  defaultRules:
-    create: false
-
-  alertmanager:
-    enabled: true
-    # alertmanagerSpec:
-    #   logFormat: json-formatted
-
   prometheusOperator:
   # logFormat: json-formatted
 
@@ -252,11 +249,6 @@ prometheus:
         - name: metricbeat-config
           configMap:
             name: metricbeat
-        # - name: metricbeat-data
-        #   hostPath:
-        #     # When metricbeat runs as non-root user, this directory needs to be writable by group (g+w)
-        #     path: /var/lib/metricbeat-data
-        #     type: DirectoryOrCreate
 
       # Add MetricBeat sidecar to proxy metrics to OpenSearch
       containers:
@@ -268,7 +260,7 @@ prometheus:
             - "-e"
           env:
             - name: ELASTICSEARCH_HOST
-              value: https://opensearch-cluster-master
+              value: https://kubefox-opensearch-main
             - name: ELASTICSEARCH_PORT
               value: "9200"
             # TODO: Integrate creds with vault
@@ -293,8 +285,6 @@ prometheus:
               subPath: modules.yml
               mountPath: /usr/share/metricbeat/modules.d/modules.yml
               readOnly: true
-          # - name: metricbeat-data
-          #   mountPath: /usr/share/metricbeat/data
 
       storageSpec:
         volumeClaimTemplate:
@@ -314,9 +304,7 @@ prometheus:
   metricbeat:
     config: |-
       metricbeat.config.modules:
-        # Mounted `metricbeat-daemonset-modules` configmap:
         path: ${path.config}/modules.d/*.yml
-        # Reload module configs as they change:
         reload.enabled: true
       setup.template:
         name: kubefox-metrics
@@ -326,7 +314,6 @@ prometheus:
         username: ${ELASTICSEARCH_USERNAME}
         password: ${ELASTICSEARCH_PASSWORD}
         index: kubefox-metrics-%{+yyyy.MM.dd}
-        
         ssl.verification_mode: none
     modules: |-
       - module: prometheus
@@ -334,7 +321,10 @@ prometheus:
         host: "localhost"
         port: "9201"
 
-  # TODO: Will want to tweak for basic cluster monitoring
+  defaultRules:
+    create: false
+  alertmanager:
+    enabled: false
   grafana:
     enabled: false
   kubeApiServer:
