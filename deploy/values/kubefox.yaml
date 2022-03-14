@@ -1,15 +1,4 @@
 certmanager: {}
-  # issuers:
-  #   letsencrypt:
-  #     enabled: true
-  #     email: info@xigxog.io
-  #     solvers:
-  #       - dns01:
-  #           cloudflare:
-  #             email: info@xigxog.io
-  #             apiTokenSecretRef:
-  #               name: cloudflare-token
-  #               key: api-token
 
 dapr: {}
 

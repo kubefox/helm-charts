@@ -7,11 +7,7 @@ certmanager:
     servicemonitor:
       enabled: true
 
-  issuers:
-    letsencrypt:
-      enabled: false
-      email: ""
-      solvers: []
+  issuers: []
 
 dashboards:
   enabled: false
@@ -77,7 +73,7 @@ fluentbit:
           # Before: kubernetes.labels.app vs kubernetes.labels.app.kubernetes.io/name
           # After:  kubernetes.labels.app vs kubernetes.labels.app_kubernetes_io/name
           Replace_Dots On
-          Retry_Limit 3
+          Retry_Limit 10
           # Type name is deprecated, turn it off
           Suppress_Type_Name On
           Trace_Error On

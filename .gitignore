@@ -1,5 +1,6 @@
+**/secrets/
+**/values/workstation/
 *.tgz
-secrets/
 _template.yaml
 Chart.lock
 helmfile.lock

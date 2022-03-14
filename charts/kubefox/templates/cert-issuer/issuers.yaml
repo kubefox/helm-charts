@@ -1,0 +1,11 @@
+{{- range .Values.certmanager.issuers }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ tpl .name $ }}
+  labels:
+    {{- include "kubefox.labels" $ | nindent 4 }}
+spec:
+  {{- tpl (toYaml .spec) $ | nindent 2 }}
+{{- end }}

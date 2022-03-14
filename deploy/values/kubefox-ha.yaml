@@ -1,11 +1,3 @@
-certmanager: {}
-
-dapr: {}
-
-dashboards: {}
-
-fluentbit: {}
-
 nats:
   cluster:
     enabled: true
@@ -14,13 +6,11 @@ nats:
 opensearch:
   replicas: 3
 
-prometheus: {}
-
 traefik:
   deployment:
     replicas: 3
 
-  # This should be moved to KubeFox chart values without hardcoded match 
+  # This should be moved to KubeFox chart values without hardcoded match
   # expressions but there is a bug in Traefik's helm chart
   # https://github.com/traefik/traefik-helm-chart/issues/468
   affinity:

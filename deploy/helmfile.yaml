@@ -6,21 +6,28 @@ releases:
   - name: local-ssd
     chart: ./charts/local-path-provisioner
     namespace: kube-system
+    missingFileHandler: Warn
     values:
       - values/local-ssd.yaml
+      - values/workstation/local-ssd.yaml
 
   - name: local-hdd
     chart: ./charts/local-path-provisioner
     namespace: kube-system
+    missingFileHandler: Warn
     values:
       - values/local-hdd.yaml
+      - values/workstation/local-hdd.yaml
 
   - name: kubefox
     chart: ../charts/kubefox
     namespace: kubefox-system
+    missingFileHandler: Warn
     values:
       - values/kubefox.yaml
       - values/kubefox-{{ .Environment.Name }}.yaml
+      - values/workstation/kubefox.yaml
+      - values/workstation/kubefox-{{ .Environment.Name }}.yaml
     needs:
       - kube-system/local-ssd
       - kube-system/local-hdd

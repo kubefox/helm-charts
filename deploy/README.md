@@ -1,4 +1,4 @@
-# KubeFox Development
+# KubeFox Deployment
 
 ## Tools
 
@@ -127,4 +127,29 @@ helmfile deps
 helmfile sync --skip-deps
 # make some changes to values, etc.
 helmfile apply --skip-deps
+```
+
+### Workstation Values
+
+Often there are value overrides that are workstation specific and should not be committed to source control. These can be placed in the directory `/deploy/values/workstation/`. The `yaml` files follow the same naming pattern as those found in `/deploy/values/`.
+
+As an example, to add a certificate issuer add the following to the file `/deploy/values/workstation/kubefox.yaml` updating things like email address and solvers as needed.
+
+```yaml
+certmanager:
+  issuers:
+    - name: letsencrypt
+      spec:
+        acme:
+          email: support@xigxog.io
+          server: https://acme-v02.api.letsencrypt.org/directory
+          privateKeySecretRef:
+            name: '{{ include "kubefox.fullname" . }}-letsencrypt-key'
+          solvers:
+            - dns01:
+                cloudflare:
+                  email: john.long@xigxog.io
+                  apiTokenSecretRef:
+                    name: cloudflare-token
+                    key: api-token
 ```

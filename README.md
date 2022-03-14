@@ -24,3 +24,7 @@ To uninstall the chart:
 ```bash
 helm delete my-<chart-name>
 ```
+
+## Deployment
+
+For example deployment setup see the README in the `deploy` directory.
