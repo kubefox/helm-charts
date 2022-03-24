@@ -19,8 +19,13 @@ dependencies:
   - alias: fluentbit
     name: fluent-bit
     repository: https://fluent.github.io/helm-charts
-    version: "0.19.20"
+    version: "0.19.21"
     condition: fluentbit.enabled
+  - alias: jaeger
+    name: jaeger
+    repository: https://jaegertracing.github.io/helm-charts
+    version: "0.55.0"
+    condition: jaeger.enabled
   - alias: nats
     name: nats
     repository: https://nats-io.github.io/k8s/helm/charts

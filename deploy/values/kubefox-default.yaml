@@ -7,4 +7,5 @@ opensearch:
   replicas: 1
 
 traefik:
-  replicas: 1
+  deployment:
+    replicas: 1

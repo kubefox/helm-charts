@@ -1,0 +1,157 @@
+{{- if .Values.collector.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubefox.fullname" . }}-collector
+  labels:
+    app.kubernetes.io/component: collector
+    {{- include "kubefox.labels" . | nindent 4 }}
+  {{- with .Values.collector.deployment.labels }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+  {{- with .Values.collector.deployment.annotations }}
+  annotations:
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: collector
+      {{- include "kubefox.selectorLabels" . | nindent 6 }}
+  {{- with .Values.collector.deployment.replicas}}
+  replicas: {{ . }}
+  {{- end }}
+  {{- with .Values.collector.deployment.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: collector
+        {{- include "kubefox.labels" . | nindent 8 }}
+      {{- with .Values.collector.pod.labels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.collector.pod.annotations }}
+      annotations:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+    spec:
+      # TODO:
+      serviceAccountName: default
+      {{- with .Values.collector.pod.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.collector.pod.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      {{- if .Values.collector.logs.enabled }}
+        - name: logs
+          image: "{{ .Values.collector.logs.image.repository }}:{{ .Values.collector.logs.image.tag }}"
+          ports:
+            - name: fluentbit
+              containerPort: {{ .Values.collector.logs.port }}
+              protocol: TCP
+            - name: http
+              containerPort: {{ .Values.collector.logs.metricsPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+              scheme: HTTP
+          volumeMounts:
+            - name: config
+              subPath: fluent-bit.conf
+              mountPath: /fluent-bit/etc/fluent-bit.conf
+          resources:
+            {{- toYaml .Values.collector.logs.resources | nindent 12 }}
+      {{- end }}
+      {{- if .Values.collector.metrics.enabled }}
+        - name: metrics
+          image: "{{ .Values.collector.metrics.image.repository }}:{{ .Values.collector.metrics.image.tag }}"
+          args:
+            - "-c"
+            - "/etc/metricbeat.yaml"
+            - "-e"
+          ports:
+            - name: prometheus
+              containerPort: {{ .Values.collector.metrics.port }}
+              protocol: TCP
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: prometheus
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: prometheus
+          volumeMounts:
+            - name: config
+              subPath: metricbeat.yaml
+              mountPath: /etc/metricbeat.yaml
+            - name: config
+              subPath: modules.yml
+              mountPath: /usr/share/metricbeat/modules.d/modules.yaml
+          resources:
+            {{- toYaml .Values.collector.metrics.resources | nindent 12 }}
+      {{- end }}
+      {{- if .Values.collector.metrics.enabled }}
+        - name: traces
+          image: "{{ .Values.collector.traces.image.repository }}:{{ .Values.collector.traces.image.tag }}"
+          args:
+            - --config-file=/etc/jaeger-collector.yaml
+          env:
+            - name: SPAN_STORAGE_TYPE
+              value: {{ .Values.collector.traces.spanStorageType }}
+          ports:
+            - name: jaeger
+              containerPort: {{ .Values.collector.traces.port }}
+              protocol: TCP
+            - name: http
+              containerPort: 14268
+              protocol: TCP
+            - name: admin
+              containerPort: 14269
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: admin
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: admin
+              scheme: HTTP
+          volumeMounts:
+            - name: config
+              subPath: jaeger-collector.yaml
+              mountPath: /etc/jaeger-collector.yaml
+          resources:
+            {{- toYaml .Values.collector.traces.resources | nindent 12 }}
+      {{- end }}
+      volumes:
+        - name: config
+          secret:
+            secretName: {{ include "kubefox.fullname" . }}-collector
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

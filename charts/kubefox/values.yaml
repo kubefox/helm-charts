@@ -1,3 +1,16 @@
+## Image References ##
+######################
+images:
+  fluentbit: &fluentbit_image
+    repository: fluent/fluent-bit
+    tag: 1.8.14
+  jaegerCollector: &jaeger_collector_image
+    repository: jaegertracing/jaeger-collector
+    tag: 1.30.0
+  metricbeat: &metricbeat_image
+    repository: docker.elastic.co/beats/metricbeat-oss
+    tag: 7.12.1
+
 certmanager:
   # TODO: HA
   #       Limit operator only namespaces owned by KF
@@ -9,11 +22,152 @@ certmanager:
 
   issuers: []
 
+collector:
+  enabled: true
+
+  opensearch:
+    url: https://kubefox-opensearch-main:9200
+    # TODO:
+    username: admin
+    password: admin
+
+  logs:
+    enabled: true
+
+    image:
+      <<: *fluentbit_image
+
+    port: 24224
+    metricsPort: 2020
+
+    config: |-
+      [SERVICE]
+          Daemon Off
+          Flush {{ .Values.fluentbit.flush }}
+          Log_Level {{ .Values.fluentbit.logLevel }}
+          HTTP_Server On
+          HTTP_Listen 0.0.0.0
+          HTTP_Port {{ .Values.collector.logs.metricsPort }}
+          Health_Check On
+      [INPUT]
+          Name              forward
+          Listen            0.0.0.0
+          Port              {{ .Values.collector.logs.port }}
+          Buffer_Chunk_Size 1M
+          Buffer_Max_Size   6M
+      [OUTPUT]
+          Name es
+          Host kubefox-opensearch-main
+          tls On
+          tls.verify Off
+          net.keepalive off
+          # TODO: You know, real security
+          HTTP_User admin
+          HTTP_Passwd admin
+          Logstash_Format On
+          Logstash_Prefix kubefox-logs
+          # Replace_Dots fixes issus where labels can be string or object with same key.
+          # Before: kubernetes.labels.app vs kubernetes.labels.app.kubernetes.io/name
+          # After:  kubernetes.labels.app vs kubernetes.labels.app_kubernetes_io/name
+          Replace_Dots On
+          Retry_Limit 10
+          # Type name is deprecated, turn it off
+          Suppress_Type_Name On
+          Trace_Error On
+          # Trace_Output On
+
+  metrics:
+    enabled: true
+
+    image:
+      <<: *metricbeat_image
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+    port: 9201
+
+    config:
+      metricbeat.config.modules:
+        path: ${path.config}/modules.d/*.yaml
+        reload.enabled: true
+      setup.template:
+        name: kubefox-metrics
+        pattern: kubefox-metrics-*
+      output.elasticsearch:
+        hosts:
+          - "{{ .Values.collector.opensearch.url }}"
+        username: "{{ .Values.collector.opensearch.username }}"
+        password: "{{ .Values.collector.opensearch.password }}"
+        index: kubefox-metrics-%{+yyyy.MM.dd}
+        ssl.verification_mode: none
+
+    modules:
+      - module: prometheus
+        metricsets: ["remote_write"]
+        host: "0.0.0.0"
+        port: "{{ .Values.collector.metrics.port }}"
+
+  traces:
+    enabled: true
+
+    image:
+      <<: *jaeger_collector_image
+
+    port: 14250
+    spanStorageType: elasticsearch
+
+    config:
+      collector:
+        grpc-server:
+          host-port: ":{{ .Values.collector.traces.port }}"
+      span-storage:
+        type: "{{ .Values.collector.traces.spanStorageType }}"
+      es:
+        username: "{{ .Values.collector.opensearch.username }}"
+        password: "{{ .Values.collector.opensearch.password }}"
+        server-urls: "{{ .Values.collector.opensearch.url }}"
+        tls:
+          enabled: true
+          skip-host-verify: true
+        index-date-separator: "."
+        index-prefix: kubefox
+
+  service:
+    type: ClusterIP
+    labels: {}
+    annotations: {}
+
+  deployment:
+    labels: {}
+    annotations: {}
+    replicas: 1
+    strategy: {}
+
+  pod:
+    labels: {}
+    annotations: {}
+
+    # TODO: setup service account
+    imagePullSecrets: []
+    securityContext: null
+    nodeSelector: {}
+    tolerations: {}
+    affinity: {}
+
 dashboards:
   enabled: false
   opensearchHosts: "https://kubefox-opensearch-main:9200"
 
 fluentbit:
+  flush: 1
+  logLevel: info
+
+  image:
+    <<: *fluentbit_image
+
   # TODO: We only want logs from our services and units
   config:
     service: |
@@ -58,26 +212,49 @@ fluentbit:
     ## https://docs.fluentbit.io/manual/pipeline/outputs
     outputs: |
       [OUTPUT]
-          Name es
+          Name forward
           Match kube.*
-          Host kubefox-opensearch-main
-          tls On
-          tls.verify Off
-          net.keepalive off
-          # TODO: You know, real security
-          HTTP_User admin
-          HTTP_Passwd admin
-          Logstash_Format On
-          Logstash_Prefix kubefox-logs
-          # Replace_Dots fixes issus where labels can be string or object with same key.
-          # Before: kubernetes.labels.app vs kubernetes.labels.app.kubernetes.io/name
-          # After:  kubernetes.labels.app vs kubernetes.labels.app_kubernetes_io/name
-          Replace_Dots On
-          Retry_Limit 10
-          # Type name is deprecated, turn it off
-          Suppress_Type_Name On
-          Trace_Error On
-          # Trace_Output On
+          Host kubefox-collector
+          Port 24224
+
+jaeger:
+  provisionDataStore:
+    cassandra: false
+    elasticsearch: false
+    kafka: false
+
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      scheme: https
+      host: kubefox-opensearch-main
+      port: 9200
+      user: admin
+      password: admin
+      cmdlineParams:
+        es.index-prefix: kubefox
+        es.index-date-separator: "."
+        es.tls.enabled: true
+        es.tls.skip-host-verify: true
+
+  agent:
+    cmdlineParams:
+      reporter.grpc.host-port: kubefox-collector:14250
+
+    daemonset:
+      useHostPort: true
+
+  collector:
+    enabled: false
+
+  query:
+    extraEnv:
+      - name: JAEGER_AGENT_HOST
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
+    agentSidecar:
+      enabled: false
 
 nats:
   nats:
@@ -238,49 +415,7 @@ prometheus:
       retention: 1d
 
       remoteWrite:
-        - url: "http://localhost:9201/write"
-
-      # Mount configs needed by MetricBeat sidecar
-      volumes:
-        - name: metricbeat-config
-          configMap:
-            name: metricbeat
-
-      # Add MetricBeat sidecar to proxy metrics to OpenSearch
-      containers:
-        - name: metricbeat
-          image: docker.elastic.co/beats/metricbeat-oss:7.12.1
-          args:
-            - "-c"
-            - "/etc/metricbeat.yml"
-            - "-e"
-          env:
-            - name: ELASTICSEARCH_HOST
-              value: https://kubefox-opensearch-main
-            - name: ELASTICSEARCH_PORT
-              value: "9200"
-            # TODO: Integrate creds with vault
-            - name: ELASTICSEARCH_USERNAME
-              value: admin
-            - name: ELASTICSEARCH_PASSWORD
-              value: admin
-            - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-          volumeMounts:
-            - name: metricbeat-config
-              subPath: metricbeat.yml
-              mountPath: /etc/metricbeat.yml
-              readOnly: true
-            - name: metricbeat-config
-              subPath: modules.yml
-              mountPath: /usr/share/metricbeat/modules.d/modules.yml
-              readOnly: true
+        - url: "http://kubefox-collector:9201/write"
 
       storageSpec:
         volumeClaimTemplate:
@@ -296,26 +431,6 @@ prometheus:
       # TODO: should be enabled at some point as we just remote write to opensearch
       # https://prometheus.io/docs/prometheus/latest/feature_flags/#prometheus-agent
       # - agent
-
-  metricbeat:
-    config: |-
-      metricbeat.config.modules:
-        path: ${path.config}/modules.d/*.yml
-        reload.enabled: true
-      setup.template:
-        name: kubefox-metrics
-        pattern: kubefox-metrics-*
-      output.elasticsearch:
-        hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
-        username: ${ELASTICSEARCH_USERNAME}
-        password: ${ELASTICSEARCH_PASSWORD}
-        index: kubefox-metrics-%{+yyyy.MM.dd}
-        ssl.verification_mode: none
-    modules: |-
-      - module: prometheus
-        metricsets: ["remote_write"]
-        host: "localhost"
-        port: "9201"
 
   defaultRules:
     create: false
@@ -404,11 +519,19 @@ traefik:
       tls:
         enabled: true
 
+  env:
+    - name: JAEGER_AGENT_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+
   # Disables sending telemetry to Traefik
   globalArguments: []
   # Is this needed?
   additionalArguments:
     - --pilot.dashboard=false
+    - --tracing.jaeger=true
+    - --tracing.jaeger.localAgentHostPort=$(JAEGER_AGENT_HOST):6831
 
   logs:
     general:

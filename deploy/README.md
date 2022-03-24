@@ -50,7 +50,7 @@ To add additional nodes use the following command.
 ```bash
 # replace {{ cluster server }} with the control node's ip or hostname
 export K3S_URL="https://{{ cluster server }}:6443"
-# pas the node token copied from the control node above
+# replace {{ node token }} with the value in `/var/lib/rancher/k3s/server/node-token` on control node
 export K3S_TOKEN="{{ node token }}"
 curl -sfL https://get.k3s.io | sh -
 ```

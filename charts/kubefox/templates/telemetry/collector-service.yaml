@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kubefox.fullname" . }}-collector
+  labels:
+    app.kubernetes.io/component: collector
+    {{- include "kubefox.labels" . | nindent 4 }}
+  {{- with .Values.collector.service.labels }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+  {{- with .Values.collector.service.annotations }}
+  annotations:
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.collector.service.type }}
+  ports:
+    - name: fluentbit
+      protocol: TCP
+      port: {{ .Values.collector.logs.port }}
+      targetPort: fluentbit
+    - name: jaeger
+      protocol: TCP
+      port: {{ .Values.collector.traces.port }}
+      targetPort: jaeger
+    - name: prometheus
+      protocol: TCP
+      port: {{ .Values.collector.metrics.port }}
+      targetPort: prometheus
+  selector:
+    app.kubernetes.io/component: collector
+    {{- include "kubefox.selectorLabels" . | nindent 4 }}
