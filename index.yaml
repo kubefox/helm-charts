@@ -2,19 +2,13 @@ apiVersion: v1
 entries:
   kubefox:
   - apiVersion: v2
-    appVersion: 0.1.0
-    created: "2022-03-10T20:25:09.828950984Z"
+    created: "2022-05-12T02:04:19.430205057Z"
     dependencies:
     - alias: certmanager
       condition: certmanager.enabled
       name: cert-manager
       repository: https://charts.jetstack.io
       version: v1.7.1
-    - alias: dapr
-      condition: dapr.enabled
-      name: dapr
-      repository: https://dapr.github.io/helm-charts
-      version: 1.6.0
     - alias: dashboards
       condition: dashboards.enabled
       name: opensearch-dashboards
@@ -24,12 +18,17 @@ entries:
       condition: fluentbit.enabled
       name: fluent-bit
       repository: https://fluent.github.io/helm-charts
-      version: 0.19.20
+      version: 0.19.21
+    - alias: jaeger
+      condition: jaeger.enabled
+      name: jaeger
+      repository: https://jaegertracing.github.io/helm-charts
+      version: 0.55.0
     - alias: nats
       condition: nats.enabled
       name: nats
       repository: https://nats-io.github.io/k8s/helm/charts
-      version: 0.13.2
+      version: 0.14.1
     - alias: opensearch
       condition: opensearch.enabled
       name: opensearch
@@ -44,12 +43,12 @@ entries:
       condition: traefik.enabled
       name: traefik
       repository: https://helm.traefik.io/traefik
-      version: 10.14.2
+      version: 10.15.0
     description: A Helm chart for the KubeFox Platform.
-    digest: 164a4b8e7472f570b291b5837deedc705bfb02101dd8fde98ba32b7cccef8153
+    digest: 3f7cdd4b46afb6190f67a33ecec6f25643145747c4031daab65de0b86a3c14a0
     name: kubefox
     type: application
     urls:
-    - https://github.com/kubefox/helm-charts/releases/download/kubefox-0.1.0/kubefox-0.1.0.tgz
-    version: 0.1.0
-generated: "2022-03-10T20:25:09.828964684Z"
+    - https://github.com/kubefox/helm-charts/releases/download/kubefox-0.2.0/kubefox-0.2.0.tgz
+    version: 0.2.0
+generated: "2022-05-12T02:04:19.430218757Z"
