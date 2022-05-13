@@ -98,7 +98,7 @@ spec:
               subPath: metricbeat.yaml
               mountPath: /etc/metricbeat.yaml
             - name: config
-              subPath: modules.yml
+              subPath: modules.yaml
               mountPath: /usr/share/metricbeat/modules.d/modules.yaml
           resources:
             {{- toYaml .Values.collector.metrics.resources | nindent 12 }}
