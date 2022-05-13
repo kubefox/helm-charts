@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   kubefox:
   - apiVersion: v2
-    created: "2022-05-12T02:04:19.430205057Z"
+    created: "2022-05-13T17:24:31.389334596Z"
     dependencies:
     - alias: certmanager
       condition: certmanager.enabled
@@ -45,10 +45,10 @@ entries:
       repository: https://helm.traefik.io/traefik
       version: 10.15.0
     description: A Helm chart for the KubeFox Platform.
-    digest: 3f7cdd4b46afb6190f67a33ecec6f25643145747c4031daab65de0b86a3c14a0
+    digest: 9a025e38855a0edc6fb7418b1da10bac353866b4d6d760f16a07c47019b28902
     name: kubefox
     type: application
     urls:
     - https://github.com/kubefox/helm-charts/releases/download/kubefox-0.2.0/kubefox-0.2.0.tgz
     version: 0.2.0
-generated: "2022-05-12T02:04:19.430218757Z"
+generated: "2022-05-13T17:24:31.389345996Z"
