@@ -1,0 +1,24 @@
+dependencies:
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: v1.8.0
+- name: fluent-bit
+  repository: https://fluent.github.io/helm-charts
+  version: 0.20.0
+- name: jaeger
+  repository: https://jaegertracing.github.io/helm-charts
+  version: 0.56.5
+- name: nats
+  repository: https://nats-io.github.io/k8s/helm/charts
+  version: 0.17.0
+- name: opensearch
+  repository: https://opensearch-project.github.io/helm-charts
+  version: 1.11.1
+- name: kube-prometheus-stack
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 35.2.0
+- name: traefik
+  repository: https://helm.traefik.io/traefik
+  version: 10.19.5
+digest: sha256:666686fe751c7226c1cb349867ba9a41fee682bd60af0cc01544aea364231223
+generated: "2022-05-15T16:09:53.8180227-04:00"

@@ -31,3 +31,12 @@ releases:
     needs:
       - kube-system/local-ssd
       - kube-system/local-hdd
+
+  - name: dashboards
+    chart: opensearch/opensearch-dashboards
+    version: 1.5.1
+    namespace: default
+    missingFileHandler: Warn
+    values:
+      - values/dashboards.yaml
+      - values/workstation/dashboards.yaml

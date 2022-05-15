@@ -157,10 +157,6 @@ collector:
     tolerations: {}
     affinity: {}
 
-dashboards:
-  enabled: false
-  opensearchHosts: "https://kubefox-opensearch-main:9200"
-
 fluentbit:
   flush: 1
   logLevel: info
@@ -255,6 +251,8 @@ jaeger:
             fieldPath: status.hostIP
     agentSidecar:
       enabled: false
+
+metacontroller: {}
 
 nats:
   nats:

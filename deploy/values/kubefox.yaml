@@ -2,10 +2,9 @@ certmanager: {}
 
 dapr: {}
 
-dashboards:
-  enabled: true
-
 fluentbit: {}
+
+metacontroller: {}
 
 nats:
   nats:
