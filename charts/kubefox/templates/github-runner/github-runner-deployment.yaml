@@ -1,0 +1,81 @@
+{{- if .Values.githubRunner.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubefox.fullname" . }}-github-runner
+  labels:
+    app.kubernetes.io/component: github-runner
+    {{- include "kubefox.labels" . | nindent 4 }}
+  {{- with .Values.githubRunner.deployment.labels }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+  {{- with .Values.githubRunner.deployment.annotations }}
+  annotations:
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: github-runner
+      {{- include "kubefox.selectorLabels" . | nindent 6 }}
+  {{- with .Values.githubRunner.deployment.replicas}}
+  replicas: {{ . }}
+  {{- end }}
+  {{- with .Values.githubRunner.deployment.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: github-runner
+        {{- include "kubefox.labels" . | nindent 8 }}
+      {{- with .Values.githubRunner.pod.labels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.githubRunner.pod.annotations }}
+      annotations:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: default
+      {{- with .Values.githubRunner.pod.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.githubRunner.pod.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: github-runner
+          image: "{{ .Values.githubRunner.image.repository }}:{{ .Values.githubRunner.image.tag }}"
+          imagePullPolicy: Always
+          env:
+            - name: ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kubefox.fullname" . }}-github-runner-secrets
+                  key: ACCESS_TOKEN
+            - name: CNB_REGISTRY_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kubefox.fullname" . }}-github-runner-secrets
+                  key: CNB_REGISTRY_AUTH
+            - name: ORG
+              value: "{{ .Values.githubRunner.organization }}"
+          resources:
+            {{- toYaml .Values.githubRunner.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
