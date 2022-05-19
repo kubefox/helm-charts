@@ -1,5 +1,7 @@
 ## Image References ##
 ######################
+
+
 images:
   fluentbit: &fluentbit_image
     repository: fluent/fluent-bit
@@ -10,6 +12,9 @@ images:
   metricbeat: &metricbeat_image
     repository: docker.elastic.co/beats/metricbeat-oss
     tag: 7.12.1
+  githubRunner: &github_runner_image
+    repository: ghcr.io/kubefox/github-runner
+    tag: v0.1.0
 
 certmanager:
   # TODO: HA
@@ -405,6 +410,7 @@ opensearch:
 
 prometheus:
   prometheusOperator:
+    enabled: false
   # logFormat: json-formatted
 
   prometheus:
@@ -565,3 +571,29 @@ traefik:
         headers:
           defaultmode: drop
           names: {}
+
+githubRunner:
+  enabled: true
+  image:
+    <<: *github_runner_image
+  organization: kubefox
+  access_token: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxx
+  registry_auth: {"index.docker.io":"Basic xyzxyz", "ghcr.io": "xyzxyz"}
+  deployment:
+    labels: {}
+    annotations: {}
+    replicas: 1
+    strategy: {}
+  pod:
+    labels: {}
+    annotations: {}
+    # TODO: setup service account
+    imagePullSecrets: []
+    securityContext: null
+    nodeSelector: {}
+    tolerations: {}
+    affinity: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
