@@ -14,7 +14,7 @@ images:
     tag: 7.12.1
   githubRunner: &github_runner_image
     repository: ghcr.io/kubefox/github-runner
-    tag: v0.1.0
+    tag: v0.2.0
 
 certmanager:
   # TODO: HA
@@ -410,7 +410,7 @@ opensearch:
 
 prometheus:
   prometheusOperator:
-    enabled: false
+    enabled: true 
   # logFormat: json-formatted
 
   prometheus:
