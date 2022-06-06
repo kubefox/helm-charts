@@ -51,17 +51,10 @@ spec:
         - name: github-runner
           image: "{{ .Values.githubRunner.image.repository }}:{{ .Values.githubRunner.image.tag }}"
           imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+              name: {{ include "kubefox.fullname" . }}-github-runner-secrets
           env:
-            - name: ACCESS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "kubefox.fullname" . }}-github-runner-secrets
-                  key: ACCESS_TOKEN
-            - name: CNB_REGISTRY_AUTH
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "kubefox.fullname" . }}-github-runner-secrets
-                  key: CNB_REGISTRY_AUTH
             - name: ORG
               value: "{{ .Values.githubRunner.organization }}"
           resources:
