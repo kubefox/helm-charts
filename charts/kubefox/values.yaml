@@ -1,20 +1,18 @@
 ## Image References ##
 ######################
-
-
 images:
   fluentbit: &fluentbit_image
     repository: fluent/fluent-bit
     tag: 1.8.14
+  githubRunner: &github_runner_image
+    repository: ghcr.io/kubefox/github-runner
+    tag: v0.2.0
   jaegerCollector: &jaeger_collector_image
     repository: jaegertracing/jaeger-collector
     tag: 1.30.0
   metricbeat: &metricbeat_image
     repository: docker.elastic.co/beats/metricbeat-oss
     tag: 7.12.1
-  githubRunner: &github_runner_image
-    repository: ghcr.io/kubefox/github-runner
-    tag: v0.2.0
 
 certmanager:
   # TODO: HA
@@ -218,6 +216,38 @@ fluentbit:
           Host kubefox-collector
           Port 24224
 
+githubRunner:
+  enabled: false
+  image:
+    <<: *github_runner_image
+
+  organization: kubefox
+  accessToken: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxx
+  registryAuth:
+    index.docker.io: Basic xyzxyz
+    ghcr.io: xyzxyz
+
+  deployment:
+    labels: {}
+    annotations: {}
+    replicas: 1
+    strategy: {}
+
+  pod:
+    labels: {}
+    annotations: {}
+    # TODO: setup service account
+    imagePullSecrets: []
+    securityContext: null
+    nodeSelector: {}
+    tolerations: {}
+    affinity: {}
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
 jaeger:
   provisionDataStore:
     cassandra: false
@@ -408,7 +438,7 @@ opensearch:
 
 prometheus:
   prometheusOperator:
-    enabled: true 
+    enabled: true
   # logFormat: json-formatted
 
   prometheus:
@@ -569,29 +599,3 @@ traefik:
         headers:
           defaultmode: drop
           names: {}
-
-githubRunner:
-  enabled: true
-  image:
-    <<: *github_runner_image
-  organization: kubefox
-  access_token: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxx
-  registry_auth: {"index.docker.io":"Basic xyzxyz", "ghcr.io": "xyzxyz"}
-  deployment:
-    labels: {}
-    annotations: {}
-    replicas: 1
-    strategy: {}
-  pod:
-    labels: {}
-    annotations: {}
-    # TODO: setup service account
-    imagePullSecrets: []
-    securityContext: null
-    nodeSelector: {}
-    tolerations: {}
-    affinity: {}
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi

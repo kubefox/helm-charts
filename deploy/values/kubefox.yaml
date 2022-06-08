@@ -4,6 +4,9 @@ dapr: {}
 
 fluentbit: {}
 
+githubRunner:
+  enabled: false
+
 metacontroller: {}
 
 nats:
