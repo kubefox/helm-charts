@@ -53,7 +53,7 @@ spec:
           imagePullPolicy: Always
           envFrom:
             - secretRef:
-              name: {{ include "kubefox.fullname" . }}-github-runner
+                name: {{ include "kubefox.fullname" . }}-github-runner
           env:
             - name: ORG
               value: "{{ .Values.githubRunner.organization }}"
