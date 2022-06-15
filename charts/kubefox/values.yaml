@@ -14,9 +14,13 @@ images:
     repository: docker.elastic.co/beats/metricbeat-oss
     tag: 7.12.1
 
+global:
+  deployKubefox: true
+
 certmanager:
   # TODO: HA
   #       Limit operator only namespaces owned by KF
+  enabled: true
   installCRDs: true
 
   prometheus:
@@ -161,6 +165,7 @@ collector:
     affinity: {}
 
 fluentbit:
+  enabled: true
   flush: 1
   logLevel: info
 
@@ -249,6 +254,7 @@ githubRunner:
       memory: 128Mi
 
 jaeger:
+  enabled: true
   provisionDataStore:
     cassandra: false
     elasticsearch: false
@@ -287,9 +293,13 @@ jaeger:
     agentSidecar:
       enabled: false
 
-metacontroller: {}
+metacontroller-helm:
+  enabled: true
+  rbac:
+    create: true
 
 nats:
+  enabled: true
   nats:
     jetstream:
       enabled: true
@@ -324,6 +334,7 @@ nats:
     enabled: false
 
 opensearch:
+  enabled: true
   clusterName: kubefox-opensearch
   nodeGroup: main
   masterService: kubefox-opensearch-main
@@ -437,6 +448,7 @@ opensearch:
               ]
 
 prometheus:
+  enabled: true
   prometheusOperator:
     enabled: true
   # logFormat: json-formatted
@@ -490,6 +502,7 @@ prometheus:
     enabled: false
 
 traefik:
+  enabled: true
   deployment:
     replicas: 3
 
@@ -599,3 +612,6 @@ traefik:
         headers:
           defaultmode: drop
           names: {}
+
+kubefoxApplication:
+  deploy: false 

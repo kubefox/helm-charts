@@ -1,3 +1,4 @@
+{{- if and .Values.collector.enabled .Values.global.deployKubefox }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -30,3 +31,4 @@ spec:
   selector:
     app.kubernetes.io/component: collector
     {{- include "kubefox.selectorLabels" . | nindent 4 }}
+{{- end }}

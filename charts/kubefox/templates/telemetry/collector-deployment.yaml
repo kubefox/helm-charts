@@ -1,4 +1,4 @@
-{{- if .Values.collector.enabled }}
+{{- if and .Values.collector.enabled .Values.global.deployKubefox }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

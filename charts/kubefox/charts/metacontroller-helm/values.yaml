@@ -1,5 +1,6 @@
+enabled: false
 rbac:
-  create: true
+  create: false
 
 image:
   repository: metacontrollerio/metacontroller

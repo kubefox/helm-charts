@@ -10,27 +10,34 @@ dependencies:
     name: cert-manager
     repository: https://charts.jetstack.io
     version: "v1.8.0"
+    condition: global.deployKubefox
   - alias: fluentbit
     name: fluent-bit
     repository: https://fluent.github.io/helm-charts
     version: "0.20.0"
+    condition: global.deployKubefox
   - alias: jaeger
     name: jaeger
     repository: https://jaegertracing.github.io/helm-charts
     version: "0.56.5"
+    condition: global.deployKubefox   
   - alias: nats
     name: nats
     repository: https://nats-io.github.io/k8s/helm/charts
     version: "0.17.0"
+    condition: global.deployKubefox     
   - alias: opensearch
     name: opensearch
     repository: https://opensearch-project.github.io/helm-charts
     version: "1.11.1"
+    condition: global.deployKubefox   
   - alias: prometheus
     name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: "35.2.0"
+    condition: global.deployKubefox    
   - alias: traefik
     name: traefik
     repository: https://helm.traefik.io/traefik
     version: "10.19.5"
+    condition: global.deployKubefox     

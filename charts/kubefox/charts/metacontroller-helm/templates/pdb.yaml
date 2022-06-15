@@ -1,3 +1,4 @@
+{{- if and .Values.enabled  .Values.global.deployKubefox }}
 {{- if and .Values.podDisruptionBudget (gt (.Values.replicas | int) 1) }}
 apiVersion: {{ ternary "policy/v1" "policy/v1beta1" (semverCompare ">=1.21.0-0" .Capabilities.KubeVersion.Version) }}
 kind: PodDisruptionBudget
@@ -16,3 +17,4 @@ spec:
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
   {{- end }}
 {{- end -}}
+{{- end}}
