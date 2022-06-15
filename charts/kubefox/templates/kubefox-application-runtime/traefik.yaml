@@ -1,0 +1,30 @@
+{{- if .Values.kubefoxApplication.deploy }}
+{{- range $comp, $v := .Values.kubefoxApplication.components }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ $comp }}-middleware"
+spec:
+  headers:
+    customRequestHeaders:
+      Kubefox-Target-Url: "kubefox://{{ $comp }}.localcluster"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: "{{ $comp }}-route"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: "{{ $v.routes.http }}" 
+      kind: Rule
+      services:
+        - name: local-broker
+          port: 8080
+      middlewares:
+        - name: "{{ $comp }}-middleware"
+  tls:
+    secretName: demo-cert
+{{- end }}
+{{- end }}

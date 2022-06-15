@@ -1,0 +1,15 @@
+global:
+  deployKubefox: false
+kubefoxApplication:
+  deploy: true
+  system: my-system
+  name: my-application
+  ingressDomain: kubefox.net
+  variables: 
+    appVar: hello
+  components:
+    python-hello:
+      image: kubefox/python-hello
+      routes:
+        http: Path('/python-hello')
+

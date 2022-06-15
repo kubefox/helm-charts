@@ -1,0 +1,9 @@
+{{- if .Values.kubefoxApplication.deploy }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: local-broker
+spec:
+  type: ExternalName
+  externalName: localhost
+{{- end }}

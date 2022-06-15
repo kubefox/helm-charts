@@ -1,0 +1,14 @@
+{{- if .Values.kubefoxApplication.deploy}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: demo
+spec:
+  dnsNames:
+    - "{{ .Values.kubefoxApplication.ingressDomain }}" 
+    - "*.{{ .Values.kubefoxApplication.ingressDomain }}"
+  secretName: demo-cert
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer
+{{- end }}
