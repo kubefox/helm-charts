@@ -34,7 +34,7 @@ releases:
 
   - name: dashboards
     chart: opensearch/opensearch-dashboards
-    version: 1.5.1
+    version: 1.6.1
     namespace: kubefox-system
     missingFileHandler: Warn
     values:

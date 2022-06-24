@@ -13,11 +13,11 @@ dependencies:
   - alias: fluentbit
     name: fluent-bit
     repository: https://fluent.github.io/helm-charts
-    version: "0.20.0"
+    version: "0.20.2"
   - alias: jaeger
     name: jaeger
     repository: https://jaegertracing.github.io/helm-charts
-    version: "0.56.5"
+    version: "0.56.6"
   - alias: nats
     name: nats
     repository: https://nats-io.github.io/k8s/helm/charts
@@ -25,12 +25,12 @@ dependencies:
   - alias: opensearch
     name: opensearch
     repository: https://opensearch-project.github.io/helm-charts
-    version: "1.11.1"
+    version: "1.12.1"
   - alias: prometheus
     name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
-    version: "35.2.0"
+    version: "35.5.2"
   - alias: traefik
     name: traefik
     repository: https://helm.traefik.io/traefik
-    version: "10.19.5"
+    version: "10.20.1"

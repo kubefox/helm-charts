@@ -271,7 +271,6 @@ jaeger:
   agent:
     cmdlineParams:
       reporter.grpc.host-port: kubefox-collector:14250
-
     daemonset:
       useHostPort: true
 
@@ -279,6 +278,8 @@ jaeger:
     enabled: false
 
   query:
+    cmdlineParams:
+      query.max-clock-skew-adjustment: 1s
     extraEnv:
       - name: JAEGER_AGENT_HOST
         valueFrom:
@@ -291,6 +292,7 @@ metacontroller: {}
 
 nats:
   nats:
+    image: nats:2.8.4
     jetstream:
       enabled: true
       memStorage:
@@ -522,7 +524,7 @@ traefik:
     kubernetesCRD:
       enabled: true
       allowCrossNamespace: false
-      allowExternalNameServices: false
+      allowExternalNameServices: true
       # ingressClass: traefik-internal
       # labelSelector: environment=production,method=traefik
       namespaces: []
@@ -564,6 +566,7 @@ traefik:
   # Is this needed?
   additionalArguments:
     - --pilot.dashboard=false
+    - --tracing.serviceName=gateway-traefik
     - --tracing.jaeger=true
     - --tracing.jaeger.localAgentHostPort=$(JAEGER_AGENT_HOST):6831
 
