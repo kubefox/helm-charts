@@ -28,3 +28,7 @@ helm delete my-<chart-name>
 ## Deployment
 
 For example deployment setup see the README in the `deploy` directory.
+
+## CRDs
+
+This project includes tools used to generate KubeFox Kubernetes CRDs from the [KubeFox Kit SDK for Go](https://github.com/kubefox/sdk-go) project. When changes are made to the models run `make crds` to update the CRD YAMLs in the KubeFox Helm chart. The YAMLs are outputted to `charts/kubefox/crds`.
