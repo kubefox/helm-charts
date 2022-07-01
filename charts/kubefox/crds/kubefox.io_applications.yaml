@@ -35,18 +35,91 @@ spec:
           spec:
             description: ApplicationSpec defines the desired state of Application
             properties:
-              bar:
+              components:
+                items:
+                  description: Component is the Schema for the components API
+                  properties:
+                    apiVersion:
+                      description: 'APIVersion defines the versioned schema of this
+                        representation of an object. Servers should convert recognized
+                        schemas to the latest internal value, and may reject unrecognized
+                        values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                      type: string
+                    kind:
+                      description: 'Kind is a string value representing the REST resource
+                        this object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                        More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                      type: string
+                    metadata:
+                      type: object
+                    spec:
+                      description: ComponentSpec defines the desired state of Component
+                      properties:
+                        description:
+                          description: Foo is an example field of Component. Edit
+                            component_types.go to remove/update
+                          type: string
+                        variables:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        version:
+                          type: string
+                      type: object
+                    status:
+                      description: ComponentStatus defines the observed state of Component
+                      properties:
+                        buildCompleted:
+                          type: boolean
+                        buildRequired:
+                          description: 'INSERT ADDITIONAL STATUS FIELD - define observed
+                            state of cluster Important: Run "make" to regenerate code
+                            after modifying this file'
+                          type: boolean
+                        buildStarted:
+                          type: boolean
+                      type: object
+                  type: object
+                type: array
+              description:
                 type: string
-              foo:
-                description: Foo is an example field of Application. Edit application_types.go
-                  to remove/update
+              domain:
                 type: string
+              routes:
+                items:
+                  properties:
+                    match:
+                      type: string
+                    priority:
+                      type: integer
+                    schedule:
+                      type: string
+                    target:
+                      type: integer
+                    type:
+                      type: string
+                  type: object
+                type: array
+              variables:
+                additionalProperties:
+                  type: string
+                type: object
             type: object
           status:
             description: ApplicationStatus defines the observed state of Application
+            properties:
+              string:
+                type: string
             type: object
         type: object
     served: true
     storage: true
     subresources:
       status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []  
