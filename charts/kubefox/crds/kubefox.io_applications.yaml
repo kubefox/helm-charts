@@ -35,12 +35,60 @@ spec:
           spec:
             description: ApplicationSpec defines the desired state of Application
             properties:
-              bar:
+              components:
+                properties:
+                  managed:
+                    additionalProperties:
+                      properties:
+                        routes:
+                          items:
+                            properties:
+                              match:
+                                type: string
+                              priority:
+                                type: integer
+                              schedule:
+                                type: string
+                              type:
+                                type: string
+                            type: object
+                          type: array
+                        unmanaged:
+                          type: string
+                      type: object
+                    type: object
+                  unmanaged:
+                    additionalProperties:
+                      properties:
+                        type:
+                          type: string
+                      type: object
+                    type: object
+                type: object
+              description:
                 type: string
-              foo:
-                description: Foo is an example field of Application. Edit application_types.go
-                  to remove/update
+              system:
                 type: string
+              title:
+                type: string
+              variables:
+                properties:
+                  description:
+                    type: string
+                  required:
+                    items:
+                      type: string
+                    type: array
+                  title:
+                    type: string
+                  type:
+                    enum:
+                    - string
+                    - number
+                    - array
+                    - boolean
+                    type: string
+                type: object
             type: object
           status:
             description: ApplicationStatus defines the observed state of Application

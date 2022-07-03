@@ -1,6 +1,6 @@
 apiVersion: v2
 type: application
-version: 0.4.0
+version: 0.5.0
 
 name: kubefox
 description: A Helm chart for the KubeFox Platform.
@@ -9,28 +9,28 @@ dependencies:
   - alias: certmanager
     name: cert-manager
     repository: https://charts.jetstack.io
-    version: "v1.8.0"
+    version: "v1.8.2"
   - alias: fluentbit
     name: fluent-bit
     repository: https://fluent.github.io/helm-charts
-    version: "0.20.2"
+    version: "0.20.3"
   - alias: jaeger
     name: jaeger
     repository: https://jaegertracing.github.io/helm-charts
-    version: "0.56.6"
+    version: "0.56.8"
   - alias: nats
     name: nats
     repository: https://nats-io.github.io/k8s/helm/charts
-    version: "0.17.0"
+    version: "0.17.1"
   - alias: opensearch
     name: opensearch
     repository: https://opensearch-project.github.io/helm-charts
-    version: "1.12.1"
+    version: "1.13.0"
   - alias: prometheus
     name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
-    version: "35.5.2"
+    version: "36.2.1"
   - alias: traefik
     name: traefik
     repository: https://helm.traefik.io/traefik
-    version: "10.20.1"
+    version: "10.24.0"
