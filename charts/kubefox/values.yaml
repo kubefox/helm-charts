@@ -3,13 +3,13 @@
 images:
   fluentbit: &fluentbit_image
     repository: fluent/fluent-bit
-    tag: 1.8.14
+    tag: 1.9.5
   githubRunner: &github_runner_image
     repository: ghcr.io/kubefox/github-runner
     tag: v0.2.0
   jaegerCollector: &jaeger_collector_image
     repository: jaegertracing/jaeger-collector
-    tag: 1.30.0
+    tag: 1.36.0
   metricbeat: &metricbeat_image
     repository: docker.elastic.co/beats/metricbeat-oss
     tag: 7.12.1
@@ -29,7 +29,8 @@ collector:
   enabled: true
 
   opensearch:
-    url: https://kubefox-opensearch-main:9200
+    host: kubefox-opensearch-main
+    port: 9200
     # TODO:
     username: admin
     password: admin
@@ -60,18 +61,17 @@ collector:
           Buffer_Max_Size   6M
       [OUTPUT]
           Name es
-          Host kubefox-opensearch-main
+          Host {{ .Values.collector.opensearch.host }}
           tls On
           tls.verify Off
           net.keepalive off
           # TODO: You know, real security
-          HTTP_User admin
-          HTTP_Passwd admin
+          HTTP_User {{ .Values.collector.opensearch.username }}
+          HTTP_Passwd {{ .Values.collector.opensearch.password }}
           Logstash_Format On
           Logstash_Prefix kubefox-logs
           # Replace_Dots fixes issus where labels can be string or object with same key.
-          # Before: kubernetes.labels.app vs kubernetes.labels.app.kubernetes.io/name
-          # After:  kubernetes.labels.app vs kubernetes.labels.app_kubernetes_io/name
+          # kubernetes.labels.app.kubernetes.io/name -> kubernetes.labels.app_kubernetes_io/name
           Replace_Dots On
           Retry_Limit 10
           # Type name is deprecated, turn it off
@@ -101,7 +101,7 @@ collector:
         pattern: kubefox-metrics-*
       output.elasticsearch:
         hosts:
-          - "{{ .Values.collector.opensearch.url }}"
+          - "https://{{ .Values.collector.opensearch.host }}:{{ .Values.collector.opensearch.port }}"
         username: "{{ .Values.collector.opensearch.username }}"
         password: "{{ .Values.collector.opensearch.password }}"
         index: kubefox-metrics-%{+yyyy.MM.dd}
@@ -131,7 +131,7 @@ collector:
       es:
         username: "{{ .Values.collector.opensearch.username }}"
         password: "{{ .Values.collector.opensearch.password }}"
-        server-urls: "{{ .Values.collector.opensearch.url }}"
+        server-urls: "https://{{ .Values.collector.opensearch.host }}:{{ .Values.collector.opensearch.port }}"
         tls:
           enabled: true
           skip-host-verify: true
@@ -288,7 +288,24 @@ jaeger:
     agentSidecar:
       enabled: false
 
-metacontroller: {}
+metacontroller:
+  additionalContainers:
+    - name: broker
+      image: kubefox/broker
+      imagePullPolicy: Always
+      args:
+        - http
+        - --dev
+        - --component-name=gateway
+        - --component-version=0.0.0
+        - --nats-addr=kubefox-nats.kubefox-system
+        - --trace-agent-addr=$(JAEGER_AGENT_HOST):6831
+      env:
+        - name: JAEGER_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+      resources: {}
 
 nats:
   nats:
@@ -494,6 +511,24 @@ prometheus:
 traefik:
   deployment:
     replicas: 3
+
+    additionalContainers:
+      - name: broker
+        image: kubefox/broker
+        imagePullPolicy: Always
+        args:
+          - http
+          - --dev
+          - --component-name=gateway
+          - --component-version=0.0.0
+          - --nats-addr=kubefox-nats.kubefox-system
+          - --trace-agent-addr=$(JAEGER_AGENT_HOST):6831
+        env:
+          - name: JAEGER_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+        resources: {}
 
   # https://github.com/traefik/traefik-helm-chart/issues/468
   # affinity:

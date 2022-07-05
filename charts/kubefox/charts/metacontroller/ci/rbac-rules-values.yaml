@@ -4,7 +4,7 @@ rbac:
 image:
   repository: metacontrollerio/metacontroller
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "dev"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -21,7 +21,7 @@ serviceAccount:
 podAnnotations: {}
 
 podSecurityContext: {}
-  # fsGroup: 2000
+  # fsGroup: 65532
 
 securityContext: {}
   # capabilities:
@@ -29,7 +29,7 @@ securityContext: {}
   #   - ALL
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
-  # runAsUser: 1000
+  # runAsUser: 65532
 
 resources: {}
   # limits:
@@ -50,7 +50,9 @@ command: "/usr/bin/metacontroller"
 
 # Command arguments which are used to start metacontroller
 commandArgs:
-  - --leader-election
+  - --zap-log-level=4
+  - --discovery-interval=20s
+  - --cache-flush-interval=30m
 
 # The name of the PriorityClass that will be assigned to metacontroller
 priorityClassName: ""
@@ -59,15 +61,42 @@ clusterRole:
   aggregationRule: {}
   rules:
   - apiGroups:
-      - "*"
+      - "apps"
+    resources:
+      - "statefulsets"
+    verbs:
+      - "get"
+      - "watch"
+      - "list"
+  - apiGroups:
+      - ""
+    resources:
+      - "services"
+    verbs:
+      - "get"
+      - "watch"
+      - "list"
+      - "create"
+      - "delete"
+  - apiGroups:
+      - ""
+    resources:
+      - "events"
+    verbs:
+      - "create"
+      - "patch"
+  - apiGroups:
+      - "metacontroller.k8s.io"
     resources:
       - "*"
     verbs:
-      - "*"
+      - "get"
+      - "watch"
+      - "list"
 
-replicas: 2
+replicas: 1
 
 # podDisruptionBudget which can be enabled when running more than one replica
-podDisruptionBudget:
-  minAvailable: 1
-  maxUnavailable: 0
+podDisruptionBudget: {}
+  # minAvailable: 1
+  # maxUnavailable: 0
