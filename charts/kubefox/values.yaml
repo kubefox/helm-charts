@@ -520,7 +520,6 @@ traefik:
           - http
           - --dev
           - --component-name=gateway
-          - --component-version=0.0.0
           - --nats-addr=kubefox-nats.kubefox-system
           - --trace-agent-addr=$(JAEGER_AGENT_HOST):6831
         env:
