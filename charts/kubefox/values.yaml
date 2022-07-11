@@ -296,8 +296,7 @@ metacontroller:
       args:
         - http
         - --dev
-        - --component-name=gateway
-        - --component-version=0.0.0
+        - --component-name=metacontroller
         - --nats-addr=kubefox-nats.kubefox-system
         - --trace-agent-addr=$(JAEGER_AGENT_HOST):6831
       env:
@@ -318,7 +317,6 @@ nats:
       fileStorage:
         enabled: true
         size: 64Gi
-        # storageClassName: ssd
 
   cluster:
     enabled: true
@@ -353,7 +351,6 @@ opensearch:
 
   persistence:
     size: 128Gi
-    # storageClass: hdd
     accessModes:
       - ReadWriteOnce
 
@@ -473,7 +470,6 @@ prometheus:
       storageSpec:
         volumeClaimTemplate:
           spec:
-            # storageClassName: ssd
             accessModes:
               - ReadWriteOnce
             resources:
